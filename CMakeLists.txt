@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SuperJupiterTimeAggregate VERSION 0.1.0 LANGUAGES CXX)
+project(SuperJupiterTimeAggregate VERSION 0.1.1 LANGUAGES CXX)
 
 set(_superjupiter_time_aggregate_top_level OFF)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -19,6 +19,9 @@ target_compile_features(SuperJupiterTimeAggregate INTERFACE cxx_std_11)
 
 if(SUPERJUPITER_TIME_AGGREGATE_BUILD_TESTS)
   enable_testing()
+  add_executable(superjupiter-time-aggregate-review tests/review_regressions.cpp)
+  target_link_libraries(superjupiter-time-aggregate-review PRIVATE SuperJupiter::TimeAggregate)
+  add_test(NAME superjupiter-time-aggregate-review COMMAND superjupiter-time-aggregate-review)
   add_executable(superjupiter-time-aggregate-tests tests/test.cpp)
   target_link_libraries(superjupiter-time-aggregate-tests PRIVATE SuperJupiter::TimeAggregate)
   add_test(NAME superjupiter-time-aggregate-tests COMMAND superjupiter-time-aggregate-tests)

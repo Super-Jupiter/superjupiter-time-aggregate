@@ -31,3 +31,13 @@ The [public header](https://github.com/Super-Jupiter/superjupiter-time-aggregate
 All time arguments are caller supplied. No method is thread-safe without caller synchronisation.
 Non-success result fields must only be used where this contract explicitly defines them.
 Memory is bounded by template capacities and local arrays; storage/network adapter implementations may have their own costs.
+
+
+## 0.1.1 review clarifications
+
+See [INTEROPERABILITY.md](INTEROPERABILITY.md) for units, timestamp horizons, numeric validity, payload constraints and storage synchronisation.
+
+- Removed unused duplicated math helpers and unnecessary includes.
+- Valid long consecutive intervals cross buckets and wraps correctly; stable means and explicit numeric validity retain accurate finite counts.
+
+Summary.numericError invalidates the mean but not finite/invalid observation counts or min/max. Long valid consecutive intervals can cross more than the half-range relative to the current bucket origin.
