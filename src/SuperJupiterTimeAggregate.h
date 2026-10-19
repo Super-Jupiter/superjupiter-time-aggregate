@@ -5,13 +5,30 @@
 #if defined(__FAST_MATH__) || (defined(__FINITE_MATH_ONLY__) && __FINITE_MATH_ONLY__ > 0)
 #error "SuperJupiter requires IEEE non-finite checks; disable fast-math"
 #endif
-#include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <limits>
+#include <float.h>
+#include <math.h>
+#include <stddef.h>
+#include <stdint.h>
 #define SUPERJUPITER_TIME_AGGREGATE_VERSION "0.1.0"
 namespace superjupiter {
 namespace time_aggregate {
+
+namespace detail {
+inline bool finite(double value) { return value == value && value >= -DBL_MAX && value <= DBL_MAX; }
+inline double oneMinusExpNegative(double ratio) {
+  // Stable at small elapsed/tau without requiring AVR's unavailable expm1.
+  if (ratio < 0.01) {
+    double term = ratio, total = ratio;
+    for (unsigned n = 2; n <= 12; ++n) {
+      term *= -ratio / n;
+      total += term;
+    }
+    return total;
+  }
+  return 1 - ::exp(-ratio);
+}
+} // namespace detail
+
 enum class Status { Accepted, Completed, InvalidTime, InvalidConfig, NumericError };
 struct Summary {
   uint32_t startMs;
@@ -76,13 +93,13 @@ public:
       return Status::NumericError;
     ++current_.observations;
     last_ = atMs;
-    if (!std::isfinite(value)) {
+    if (!detail::finite(value)) {
       ++current_.invalidCount;
       return status;
     }
     const double n = static_cast<double>(current_.finiteCount + 1);
     const double mean = current_.finiteCount ? current_.mean * (1 - 1 / n) + value / n : value;
-    if (!std::isfinite(mean)) {
+    if (!detail::finite(mean)) {
       ++current_.invalidCount;
       return Status::NumericError;
     }
